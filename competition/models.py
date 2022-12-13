@@ -31,12 +31,12 @@ class Equipe(models.Model):
 
 
 class Match(models.Model):
-    ligue = models.ForeignKey(Ligue, models.DO_NOTHING,
+    ligue = models.ForeignKey(Ligue, on_delete=models.CASCADE,
                               db_column='ligue', to_field='code_ligue')
     date = models.DateTimeField()
-    id_locaux = models.ForeignKey('Equipe', models.DO_NOTHING, db_column='id_locaux',
+    id_locaux = models.ForeignKey('Equipe', on_delete=models.CASCADE, db_column='id_locaux',
                                   related_name='Equipe1', to_field='id_federation')
-    id_visiteur = models.ForeignKey('Equipe', models.DO_NOTHING, db_column='id_visiteur',
+    id_visiteur = models.ForeignKey('Equipe', on_delete=models.CASCADE, db_column='id_visiteur',
                                     related_name='Equipe2', to_field='id_federation')
     score_locaux = models.IntegerField()
     score_visiteur = models.IntegerField()
@@ -54,10 +54,10 @@ class Match(models.Model):
 
 class SeasonScore(models.Model):
     # if OneToOneField is used to link a season to a ligue it would make ligue unique
-    ligue = models.ForeignKey(Ligue, models.DO_NOTHING,
+    ligue = models.ForeignKey(Ligue, on_delete=models.CASCADE,
                               db_column='ligue', to_field='code_ligue')
     equipe = models.ForeignKey(
-        Equipe, models.DO_NOTHING, db_column='equipe', to_field='id_federation')
+        Equipe, on_delete=models.CASCADE, db_column='equipe', to_field='id_federation')
     rank_ligue = models.IntegerField(null=True)
     match_played = models.IntegerField(null=True)
     wins = models.IntegerField(null=True)
