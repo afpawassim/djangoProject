@@ -1,0 +1,43 @@
+{% extends "competition/base.html" %}
+
+{% block content %}
+
+
+<div class="container">
+    <h2 class="text-center"><u>MATCHES</u></h2><br>
+    <table class="table table-dark table-striped">
+        <thead>
+            <tr>
+                <th>ligue</th>
+                <th>date</th>
+                <th>locaux</th>
+                <th>visiteur</th>
+                <th>but_locaux</th>
+                <th>but_visiteur</th>                
+                <th>code_match</th>
+                <th>indoors/outdoors</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            {% if d %}
+            {% for i in d %}
+            <tr>
+                <td>{{ i.ligue.titre }}</td>
+                <td>{{ i.date }}</td>
+                <td>{{ i.id_locaux.nom }}</td>
+                <td>{{ i.id_visiteur.nom }}</td>
+                <td>{{ i.score_locaux }}</td>
+                <td>{{ i.score_visiteur }}</td>
+                <td>{{ i.code_match }}</td>
+                <td>{{ i.local }}</td>
+
+
+            </tr>
+            {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

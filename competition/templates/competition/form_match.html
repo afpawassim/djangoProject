@@ -1,0 +1,16 @@
+{% extends "competition/base.html" %}
+
+{% block content %}
+
+<h1>Add match</h1>
+{#  #}
+<form method="POST" action="">
+    {% csrf_token %}
+    <!-- {{ formset.as_p }} -->
+
+    {{ formset.as_p }}  
+    
+    <input type="submit" value="Submit" class="btn btn-primary">
+</form>
+
+{% endblock %}

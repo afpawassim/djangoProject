@@ -1,0 +1,15 @@
+{% extends "competition/base.html" %}
+
+{% block content %}
+<h1>Edit ligue</h1>
+{#  #}
+
+<form method="POST" action="">
+    {% csrf_token %}
+    <!-- {{ formset.as_p }} -->
+
+    {{ formset.as_table }}  
+    <br>
+    <input type="submit" value="Submit" class="btn btn-primary">
+</form>
+{% endblock %}

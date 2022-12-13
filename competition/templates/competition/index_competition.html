@@ -1,0 +1,51 @@
+{% extends "competition/base.html" %}
+
+{% block content %}
+<br><br><br>
+<h1> Classement pour le {% now "SHORT_DATETIME_FORMAT" %} </h1>
+
+<div class="container">
+    <h2 class="text-center"><u>Toutes Ligues</u></h2><br>
+    <table class="table table-dark table-striped">
+        <thead>
+            <tr>
+                <th>ligue</th>
+                <th>equipe</th>
+                <th>rank_ligue</th>
+                <th>MJoués</th>
+                <th>wins</th>
+                <th>draws</th>
+                <th>losses</th>
+                <th>goals_for</th>
+                <th>goals_against</th>
+                <th>goals_difference</th>
+                <th>points</th>
+                <th>points_per_match</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            {% if d %}
+            {% for i in d %}
+            <tr>
+                <td>{{ i.ligue.titre }}</td>
+                <td>{{ i.equipe.nom }}</td>
+                <td>{{ i.rank_ligue }}</td>
+                <td>{{ i.match_played }}</td>
+                <td>{{ i.wins }}</td>
+                <td>{{ i.draws }}</td>
+                <td>{{ i.losses }}</td>
+                <td>{{ i.goals_for }}</td>
+                <td>{{ i.goals_against }}</td>
+                <td>{{ i.goal_diff }}</td>
+                <td>{{ i.points }}</td>
+                <td>{{ i.points_per_match }}</td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,15 @@
+
+{{ latest_Equipe_list }}
+
+
+<br><br><br><br>
+{% if latest_Equipe_list %}
+    <ul>
+    {% for participant in latest_Equipe_list %}
+        {{participant}}
+        <li><a href="/competition/{{ participant.nom }}/">{{ participant.nom }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No competition are available.</p>
+{% endif %}

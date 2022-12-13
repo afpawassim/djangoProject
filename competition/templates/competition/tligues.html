@@ -1,0 +1,41 @@
+{% extends "competition/base.html" %}
+
+{% block content %}
+
+
+<div class="container">
+    <h2 class="text-center"><u>Ligues</u></h2><br>
+    <table class="table table-dark table-striped">
+        <thead>
+            <tr>
+                <th>titre</th>
+                <th>status</th>
+                <th>code_ligue</th>
+                <th>year</th>
+                <th></th>
+                <th>liste Equipes</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            {% if d %}
+            {% for i in d %}
+            <tr>
+                <td>{{ i.titre }}</td>
+                <td>{{ i.status }}</td>
+                <td>{{ i.code_ligue }}</td>
+                <td>{{ i.year }}</td>
+                 <td>
+                    <a href="{% url 'competition:edit_ligue' i.id %}" class="btn btn-secondary">Edit</a> <!--<a href="/edit_ligue/{{ i.id }}/">Edit</a> -->
+                </td>
+                <td>
+                    <!-- <a href="liste_equipes" class="btn btn-secondary">Liste Equipes</a> -->
+                </td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

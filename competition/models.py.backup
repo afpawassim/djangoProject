@@ -1,0 +1,147 @@
+from django.db import models
+from django.db import transaction
+# Create your models here.
+
+
+class Ligue(models.Model):
+    titre = models.CharField(max_length=50)
+    #premier_prix = models.BigIntegerField()
+    code_ligue = models.CharField(max_length=250)
+    year = models.IntegerField()
+    def __str__(self):
+        return self.titre
+
+class Equipe(models.Model):
+    nom = models.CharField(max_length=50)
+    #image_logo = models.CharField(max_length=250)
+    image_logo = str(nom) + '.png'
+    id_federation = models.BigIntegerField(unique=True)
+    pays = models.CharField(max_length=50)
+    ligues = models.ManyToManyField(Ligue)  # , through='EquipeLigue')
+    #etat = models.CharField(max_length=50, choices=(
+    #    ('0', 'activated'), ('1', 'deasctivated')), default='activated')
+
+    def __str__(self):
+        return self.nom
+    # if ligue added to equipe then create a season score
+    def save(self, *args, **kwargs):
+        super(Equipe, self).save(*args, **kwargs)
+        transaction.on_commit(self.createrow_season_score)
+        
+    def createrow_season_score(self):                   
+        #import ipdb; ipdb.set_trace()
+        # check if ligue exists, it s a manytomany field 
+        #self.ligues.select_related() self.ligues.prefetch_related()
+        for ligue in Equipe.objects.get(nom=self.nom).ligues.all():
+            SeasonScore.objects.create(ligue=ligue,
+                                           equipe=self,
+                                           rank=0,
+                                           match_played=0,
+                                           wins=0,
+                                           draws=0,
+                                           losses=0,
+                                           goals_for=0,
+                                           goals_against=0,
+                                           goal_diff=0,
+                                           points=0,
+                                           points_per_match=0
+                                           )
+
+
+class Match(models.Model):
+    ligue = models.ForeignKey(Ligue, models.DO_NOTHING, db_column='ligue')
+    #ville = models.CharField(max_length=150)
+    date = models.DateTimeField()
+    id_locaux = models.ForeignKey('Equipe', models.DO_NOTHING, db_column='id_locaux',
+                                  related_name='Equipe1')
+    id_visiteur = models.ForeignKey('Equipe', models.DO_NOTHING, db_column='id_visiteur',
+                                    related_name='Equipe2')
+    score_locaux = models.IntegerField()
+    score_visiteur = models.IntegerField()
+    code_match = models.BigIntegerField(unique=True)
+    local = models.CharField(max_length=50, choices=(
+        ('0', 'alle'), ('1', 'retour')))
+
+    def __str__(self):
+        return str(self.id_locaux) + ' vs ' + str(self.id_visiteur) + ' ' + str(self.date) + ' ' + str(self.local)
+
+    def save(self, *args, **kwargs):
+        super(Match, self).save(*args, **kwargs)
+        visiteur_score={
+                'match_played': models.F('match_played') + 1,
+                'wins': models.F('wins') + 1 if self.score_visiteur > self.score_locaux else models.F('wins'),
+                'draws': models.F('draws') + 1 if self.score_visiteur == self.score_locaux else models.F('draws'),
+                'losses': models.F('losses') + 1 if self.score_visiteur < self.score_locaux else models.F('losses'),
+                'goals_for': models.F('goals_for') + self.score_visiteur,
+                'goals_against': models.F('goals_against') + self.score_locaux,
+                'goal_diff': models.F('goal_diff') + self.score_visiteur - self.score_locaux,
+                'points': models.F('points') + 3 if self.score_visiteur > self.score_locaux 
+                        else models.F('points') + 1 if self.score_visiteur == self.score_locaux 
+                        else models.F('points') + 0,
+                'rank': 1,
+                'points_per_match': 0
+                #'points_per_match': 0 if models.F('points') == 0 else models.F('points') / models.F('match_played')
+            }
+        locaux_score={
+                'match_played': models.F('match_played') + 1,
+                'wins': models.F('wins') + 1 if self.score_locaux > self.score_visiteur else models.F('wins'),
+                'draws': models.F('draws') + 1 if self.score_locaux == self.score_visiteur else models.F('draws'),
+                'losses': models.F('losses') + 1 if self.score_locaux < self.score_visiteur else models.F('losses'),
+                'goals_for': models.F('goals_for') + self.score_locaux,
+                'goals_against': models.F('goals_against') + self.score_visiteur,
+                'goal_diff': models.F('goal_diff') + self.score_locaux - self.score_visiteur,
+                'points': models.F('points') + 3 if self.score_visiteur > self.score_locaux 
+                        else models.F('points') + 1 if self.score_visiteur == self.score_locaux 
+                        else models.F('points') + 0,
+                'rank': 1,
+                'points_per_match': 0
+                #'points_per_match': 0 if models.F('points') == 0 else models.F('points') / models.F('match_played')
+            }            
+        SeasonScore.objects.filter(
+            ligue=self.ligue,
+            equipe=self.id_visiteur).update(**visiteur_score)
+        SeasonScore.objects.filter(
+            ligue=self.ligue,
+            equipe=self.id_locaux).update(**locaux_score)
+
+class SeasonScore(models.Model):
+    # if OneToOneField is used to link a season to a ligue it would make ligue unique
+    ligue = models.ForeignKey(Ligue, models.DO_NOTHING, db_column='ligue')
+    equipe = models.ForeignKey(Equipe, models.DO_NOTHING, db_column='equipe')
+    rank = models.IntegerField(null=True)
+    match_played = models.IntegerField(null=True)
+    wins = models.IntegerField(null=True)
+    draws = models.IntegerField(null=True)
+    losses = models.IntegerField(null=True)
+    goals_for = models.IntegerField(null=True)
+    goals_against = models.IntegerField(null=True)
+    goal_diff = models.IntegerField(null=True)
+    points = models.IntegerField(null=True)
+    points_per_match = models.FloatField(null=True)
+    # function to update the ranks
+    
+    def __str__(self):
+        return f"SeasonScore for >> {self.ligue} << @ {self.equipe} "
+
+    def update_rank(self):
+        season_scores = SeasonScore.objects.filter(ligue=self.ligue).order_by('-points', '-goal_diff', '-goals_for')
+        for i, season_score in enumerate(season_scores):
+            season_score.rank = i+1
+            season_score.save()
+    # method for wins setter
+    # def set_wins(self, wins):
+    #     self.wins = wins
+    #     self.save()
+    # class Meta:
+    #     managed = False
+    #     db_table = 'season_score'
+
+
+
+
+# class Mitemps(models.Model):
+#     match = models.ForeignKey(Match, models.DO_NOTHING, db_column='match')
+#     duree = models.IntegerField()
+#     debut = models.DateTimeField()
+#     score_locaux = models.IntegerField()
+#     score_visiteur = models.IntegerField()
