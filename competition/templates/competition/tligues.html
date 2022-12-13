@@ -28,9 +28,11 @@
                  <td>
                     <a href="{% url 'competition:edit_ligue' i.id %}" class="btn btn-secondary">Edit</a> <!--<a href="/edit_ligue/{{ i.id }}/">Edit</a> -->
                 </td>
-                <td>
-                    <!-- <a href="liste_equipes" class="btn btn-secondary">Liste Equipes</a> -->
-                </td>
+                <td> 
+                    {% for eq in i.equipe_set.all %}
+                    {{ eq.nom }}<br>
+                    {% endfor %}
+                </td
             </tr>
             {% endfor %}
             {% endif %}
